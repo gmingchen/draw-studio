@@ -1,0 +1,11 @@
+@use 'mixins' as *;
+
+@include b(draw-board) {
+  width: fit-content;
+  @include e(canvas) {
+    border-radius: 8px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+}
+
