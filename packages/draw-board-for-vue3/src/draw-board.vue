@@ -29,7 +29,7 @@
   import { ref, reactive, useTemplateRef, computed, onMounted, onUnmounted } from 'vue'
   import { drawBoardProps, DrawBoardEmits } from './draw-board'
   import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines } from '@draw-board/utils'
-  import { RangePicker, ColorPicker } from './components'
+  import { RangePicker, ColorPicker } from './components/index.ts'
 
   const n = namespace('draw-board')
   defineOptions({ name: 'DrawBoard' })
