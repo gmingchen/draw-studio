@@ -1,0 +1,12 @@
+@use 'mixins' as *;
+
+@include b(color-picker) {
+  padding: 0px;
+  width: 24px;
+  height: 24px;
+  &::-webkit-color-swatch-wrapper {
+    padding: 4px 4px;
+  }
+}
+
+

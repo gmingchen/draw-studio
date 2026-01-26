@@ -16,7 +16,8 @@
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "eslint-plugin-vue": "^9.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vue": "^3.5.0"
   },
   "engines": {
     "node": ">=16"

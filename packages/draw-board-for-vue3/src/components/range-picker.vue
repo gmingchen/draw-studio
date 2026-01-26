@@ -5,26 +5,26 @@
     :value="modelValue"
     @input="onInput"
     v-bind="$attrs"
-    type="color"
+    type="range"
   />
 </template>
 
 <script setup>
 import { ref, useTemplateRef, getCurrentInstance } from 'vue';
 import { namespace } from '@draw-board/utils';
-import { colorPickerProps } from './color-picker.ts'
+import { rangePickerProps } from './range-picker.ts'
 
-const n = namespace('color-picker')
-const props = defineProps(colorPickerProps)
+const n = namespace('range-picker')
+const props = defineProps(rangePickerProps)
 const emits = defineEmits(['input'])
 const instance = getCurrentInstance()
 const inputRef = useTemplateRef('inputRef')
 
 const onInput = (event) => {
-  emits('input', event.target.value)
+  emits('input', +event.target.value)
 }
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/color-picker.scss';
+@use '@draw-board/theme-chalk/src/range-picker.scss';
 </style>
