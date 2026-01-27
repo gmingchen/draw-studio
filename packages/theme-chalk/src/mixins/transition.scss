@@ -1,0 +1,6 @@
+.rotate-and-scale {
+  transition: all 0.2s ease;
+  &:hover {
+    transform: rotate(1deg) scale(1.05);
+  }
+}

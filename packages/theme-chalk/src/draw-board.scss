@@ -1,11 +1,49 @@
 @use 'mixins' as *;
 
+$toolbar: #{$namespace}-draw-board#{$element-separator}toolbar;
+$icon: #{$namespace}-icon;
+
 @include b(draw-board) {
+  display: flex;
+  gap: 10px;
   width: fit-content;
   @include e(canvas) {
     border-radius: 8px;
     cursor: crosshair;
     touch-action: none;
+  }
+  @include e(toolbar) {
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .#{$icon} {
+      cursor: pointer;
+      @extend .rotate-and-scale;
+      @include when(disable) {
+        cursor: not-allowed;
+        opacity: 0.3;
+      }
+    }
+  }
+  @include m(top) {
+    flex-direction: column;
+  }
+  @include m(right) {
+    flex-direction: row-reverse;
+    .#{$toolbar} {
+      flex-direction: column;
+    }
+  }
+  @include m(bottom) {
+    flex-direction: column-reverse;
+  }
+  @include m(left) {
+    flex-direction: row;
+    .#{$toolbar} {
+      flex-direction: column;
+    }
   }
 }
 

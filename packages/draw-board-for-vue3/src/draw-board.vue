@@ -1,23 +1,22 @@
 <template>
-  <div :class="[n.b()]">
-    <div :class="[n.e('toolbar')]">
-      <RangePicker
-        v-model="lineWidth"
-        @input="(value) => $emit('update:line-width', value)">
-      </RangePicker>
-      {{ lineWidth  }}
-      <ColorPicker
-        v-model="color"
-        @input="(value) => $emit('update:color', value)">
+  <div :class="[n.b(), n.m(props.toolbarPosition)]">
+    <div :class="[n.e('toolbar')]" :style="style" v-if="useToolbar">
+      <template v-if="useHistory">
+        <Icon :class="n.is('disable', !canUndo)" name="Left" @click="onUndo"></Icon>
+        <Icon :class="n.is('disable', !canRedo)" name="Right" @click="onRedo"></Icon>
+      </template>
+      <Icon name="Broom" @click="onClear"></Icon>
+      <LinePicker v-model="insideLineWidth" @change="onLineWidthChange"></LinePicker>
+      <ColorPicker v-model="insideColor" @input="onColorChange">
       </ColorPicker>
-      {{ history.active }}
+      <Icon name="Download" @click="onDownload"></Icon>
     </div>
     <canvas
       ref="canvasRef"
       :class="[n.e('canvas')]"
       :width="width"
       :height="height"
-      :style="canvasStyle"
+      :style="style"
       @mousedown="onMouseDown"
       @mouseup="onMouseUp"
       @mouseenter="onMouseEnter">
@@ -26,17 +25,17 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, useTemplateRef, computed, onMounted, onUnmounted } from 'vue'
+  import { ref, reactive, useTemplateRef, computed, watch, onMounted, onUnmounted } from 'vue'
   import { drawBoardProps, DrawBoardEmits } from './draw-board'
   import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines } from '@draw-board/utils'
-  import { RangePicker, ColorPicker } from './components/index.ts'
+  import { Icon, LinePicker, ColorPicker } from './components'
 
   const n = namespace('draw-board')
   defineOptions({ name: 'DrawBoard' })
   const emits = defineEmits<DrawBoardEmits>()
   const props = defineProps(drawBoardProps)
 
-  const canvasStyle = computed(() => ({
+  const style = computed(() => ({
     backgroundColor: props.backgroundColor
   }))
 
@@ -56,10 +55,32 @@
     active: -1,
     list: []
   })
+  const canUndo = computed(() => history.active > 0)
+  const canRedo = computed(() => history.active < history.list.length - 1)
+
+
+  const insideLineWidth = ref(props.lineWidth)
+  watch(() => props.lineWidth, (value: number) => {
+    insideLineWidth.value = value
+  })
+  const insideColor = ref(props.color)
+  watch(() => props.color, (value: string) => {
+    insideColor.value = value
+  })
 
   const handleDrawLines = (positions: Position[]) => {
-    const { lineWidth, color } = props
-    drawLines(context!, positions, lineWidth, color)
+    drawLines(context!, positions, insideLineWidth.value, insideColor.value)
+  }
+
+  const handleSaveHistory = () => {
+    if (!props.useHistory) return
+    const { width, height } = canvasRef.value!
+    const image = context!.getImageData(0, 0, width, height)
+    if (history.active < history.list.length - 1) {
+      history.list.splice(history.active + 1)
+    }
+    history.list.push(image)
+    history.active = history.list.length - 1
   }
 
   const handleGlobalMouseMove = (event: Event) => {
@@ -85,7 +106,7 @@
     lastPosition.x = eventPosition.x
     lastPosition.y = eventPosition.y
     lastIsInside.value = isInside
-    emits('draw', { x: eventPosition.x, y: eventPosition.y })
+    emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
   }
   const handleGlobalMouseUp = (_event: Event) => {
     handleStopDraw()
@@ -120,16 +141,37 @@
     }
   }
 
-  const handleSaveHistory = () => {
-    if (!props.useHistory) return
-    const { width, height } = canvasRef.value!
-    const image = context!.getImageData(0, 0, width, height)
-    if (history.active < history.list.length - 1) {
-      history.list.splice(history.active + 1)
-    }
-    history.list.push(image)
-    history.active = history.list.length - 1
+
+  const handleUndo = () => {
+    if (history.active <= 0 || !context) return
+    history.active--
+    const imageData = history.list[history.active]
+    context.putImageData(imageData, 0, 0)
+    return imageData
   }
+  const handleRedo = () => {
+    if (history.active >= history.list.length - 1 || !context) return
+    history.active++
+    const imageData = history.list[history.active]
+    context.putImageData(imageData, 0, 0)
+    return imageData
+  }
+  const handleClear = () => {
+    if (!context) return
+    const { width, height, backgroundColor } = props
+    context.fillStyle = backgroundColor
+    context.fillRect(0, 0, width, height)
+    handleSaveHistory()
+  }
+  const handleDownload = (name: string = `draw-board-${ Date.now() }`) => {
+    if (!canvasRef.value) return
+    const canvas = canvasRef.value!
+    const link = document.createElement('a')
+    link.download = `${name}.png`
+    link.href = canvas!.toDataURL('image/png')
+    link.click()
+  }
+
 
   const onMouseDown = (event: Event) => {
     if (!canvasRef.value) return
@@ -157,6 +199,33 @@
     lastIsInside.value = true
   }
 
+
+
+  const onUndo = () => {
+    const imageData = handleUndo()
+    emits('undo', canvasRef.value!, context!, imageData)
+  }
+  const onRedo = () => {
+    const imageData = handleRedo()
+    emits('redo', canvasRef.value!, context!, imageData)
+  }
+  const onClear = () => {
+    handleClear()
+    emits('clear', canvasRef.value!, context!)
+  }
+  const onLineWidthChange = (value: number) => {
+    insideLineWidth.value = value
+    emits('update:line-width', value)
+  }
+  const onColorChange = (value: string) => {
+    insideColor.value = value
+    emits('update:color', value)
+  }
+  const onDownload = () => {
+    handleDownload()
+    emits('download', canvasRef.value!, context!)
+  }
+
   const init = () => {
     if (!canvasRef.value) return
     context = canvasRef.value.getContext('2d')
@@ -175,6 +244,14 @@
     handleGlobalListenersRemove()
   })
 
+  defineExpose({
+    canvas: canvasRef.value,
+    context,
+    undo: handleUndo,
+    redo: handleRedo,
+    clear: handleClear,
+    download: handleDownload
+  })
 </script>
 
 <style lang="scss" scoped>

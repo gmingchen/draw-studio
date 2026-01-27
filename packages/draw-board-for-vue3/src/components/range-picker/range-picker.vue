@@ -9,18 +9,15 @@
   />
 </template>
 
-<script setup>
-import { ref, useTemplateRef, getCurrentInstance } from 'vue';
+<script lang="ts" setup>
 import { namespace } from '@draw-board/utils';
-import { rangePickerProps } from './range-picker.ts'
+import { rangePickerProps } from './range-picker'
 
 const n = namespace('range-picker')
 const props = defineProps(rangePickerProps)
 const emits = defineEmits(['input'])
-const instance = getCurrentInstance()
-const inputRef = useTemplateRef('inputRef')
 
-const onInput = (event) => {
+const onInput = (event: Event) => {
   emits('input', +event.target.value)
 }
 </script>

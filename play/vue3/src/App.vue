@@ -1,9 +1,12 @@
 <template>
   <div class="app">
-    {{ color }}
     <DrawBoard
       v-model:line-width="lineWidth"
       v-model:color="color"
+      :use-toolbar="true"
+      toolbar-position="top"
+      :use-history="true"
+      :max-history="20"
       width="500"
       height="500"
       background-color="white"
@@ -17,11 +20,10 @@ import DrawBoard from '@draw-board/draw-board-for-vue3'
 
 const lineWidth = ref(2)
 
-const color = ref('red')
+const color = ref('#FF0000')
 
-const onDraw = (position) => {
-  console.log(position);
-  
+const onDraw = (...args) => {
+  console.log(args);
 }
 
 </script>
@@ -32,6 +34,6 @@ const onDraw = (position) => {
   width: 700px;
   height: 700px;
   margin: 0 auto;
-  background-color: #A3A0A0FF;
+  background-color: #A3A0A011;
 }
 </style>

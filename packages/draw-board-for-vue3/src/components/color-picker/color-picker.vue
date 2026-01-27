@@ -9,14 +9,14 @@
   />
 </template>
 
-<script setup>
-import { ref, useTemplateRef, getCurrentInstance } from 'vue';
-import { namespace } from '@draw-board/utils';
-import { colorPickerProps } from './color-picker.ts'
+<script lang="ts" setup>
+import { useTemplateRef, getCurrentInstance } from 'vue'
+import { namespace } from '@draw-board/utils'
+import { colorPickerProps, ColorPickerEmits } from './color-picker'
 
 const n = namespace('color-picker')
 const props = defineProps(colorPickerProps)
-const emits = defineEmits(['input'])
+const emits = defineEmits<ColorPickerEmits>()
 const instance = getCurrentInstance()
 const inputRef = useTemplateRef('inputRef')
 

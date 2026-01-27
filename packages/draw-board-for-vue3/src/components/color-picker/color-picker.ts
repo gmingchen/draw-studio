@@ -8,3 +8,7 @@ export const colorPickerProps = {
 } as const
 
 export type ColorPickerType = ExtractPropTypes<typeof colorPickerProps>
+
+export interface ColorPickerEmits {
+  (e: 'input', color: string): void
+}
