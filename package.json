@@ -1,7 +1,7 @@
 {
   "name": "draw-studio",
   "private": false,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "A powerful drawing board plugin for Vue 3 with customizable tools and artistic styles",
   "type": "module",
   "main": "dist/draw-studio.umd.js",
