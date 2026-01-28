@@ -19,7 +19,10 @@
       :style="style"
       @mousedown="onMouseDown"
       @mouseup="onMouseUp"
-      @mouseenter="onMouseEnter">
+      @mouseenter="onMouseEnter"
+      @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd">
     </canvas>
   </div>
 </template>
@@ -27,7 +30,7 @@
 <script lang="ts" setup>
   import { ref, reactive, useTemplateRef, computed, watch, onMounted, onUnmounted } from 'vue'
   import { drawStudioProps, DrawStudioEmits } from './draw-studio'
-  import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines } from '@draw-studio/utils'
+  import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines, drawImage } from '@draw-studio/utils'
   import { Icon, LinePicker, ColorPicker } from './components'
 
   const n = namespace('draw-studio')
@@ -67,10 +70,13 @@
   watch(() => props.color, (value: string) => {
     insideColor.value = value
   })
+  
 
   const handleDrawLines = (positions: Position[]) => {
     drawLines(context!, positions, insideLineWidth.value, insideColor.value)
   }
+
+
 
   const handleSaveHistory = () => {
     if (!props.useHistory) return
@@ -81,6 +87,17 @@
     }
     history.list.push(image)
     history.active = history.list.length - 1
+  }
+
+  const handleRest = () => {
+    if (!context) return
+    const { width, height, backgroundColor, useBackgroundImage, backgroundImage, backgroundImageMode } = props
+    context.fillStyle = backgroundColor
+    context.fillRect(0, 0, width, height)
+    if (canvasRef.value && useBackgroundImage && backgroundImage) {
+      drawImage(canvasRef.value, context, backgroundImage, backgroundImageMode)
+    }
+    handleSaveHistory()
   }
 
   const handleGlobalMouseMove = (event: Event) => {
@@ -158,10 +175,7 @@
   }
   const handleClear = () => {
     if (!context) return
-    const { width, height, backgroundColor } = props
-    context.fillStyle = backgroundColor
-    context.fillRect(0, 0, width, height)
-    handleSaveHistory()
+    handleRest()
   }
   const handleDownload = (name: string = `draw-studio-${ Date.now() }`) => {
     if (!canvasRef.value) return
@@ -199,7 +213,23 @@
     lastIsInside.value = true
   }
 
-
+  const onTouchStart = (event: Event) => {
+    event.preventDefault()
+    handleStartDraw(event)
+  }
+  const onTouchMove = (event: Event) => {
+    const canvas = canvasRef.value
+    if (!isDrawing.value || !canvas || !context) return
+    event.preventDefault()
+    const eventPosition = getEventPosition(canvas, event)
+    handleDrawLines([lastPosition, eventPosition])
+    lastPosition.x = eventPosition.x
+    lastPosition.y = eventPosition.y
+    emits('draw', canvas, context, { x: eventPosition.x, y: eventPosition.y })
+  }
+  const onTouchEnd = () => {
+    handleStopDraw()
+  }
 
   const onUndo = () => {
     const imageData = handleUndo()
@@ -230,10 +260,7 @@
     if (!canvasRef.value) return
     context = canvasRef.value.getContext('2d')
     if (!context) return
-    const { width, height, backgroundColor } = props
-    context.fillStyle = backgroundColor
-    context.fillRect(0, 0, width, height)
-    handleSaveHistory()
+    handleRest()
   }
 
   onMounted(() => {

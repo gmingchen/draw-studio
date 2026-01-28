@@ -117,3 +117,95 @@ export const drawLines = (context: CanvasRenderingContext2D, positions: Array<Po
   context.stroke()
 }
 
+/**
+ * 通过 fetch 获取图片数据（blob）并绘制到 canvas，彻底避免跨域
+ * @param canvas 画布元素
+ * @param context 画布上下文
+ * @param url 图片地址
+ * @returns 图片绘制完成的 Promise
+ */
+export const fetchImage = async (url: string): Promise<ImageBitmap> => {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('Network response was not ok')
+    const blob = await res.blob()
+    const image = await createImageBitmap(blob)
+    return image
+  } catch (err) {
+    throw new Error('Failed to load image by fetch: ' + (err as Error).message)
+  }
+}
+
+export const imageMode = ['aspectFit', 'aspectFill', 'widthFix', 'heightFix'] as const
+export type ImageMode = typeof imageMode[number]
+/**
+ * 绘制图片到画布
+ * @param canvas 画布元素
+ * @param context 画布上下文
+ * @param url 图片 URL
+ * @param mode 缩放模式：aspectFit / aspectFill / widthFix / heightFix
+ * @param useCORS 是否使用 CORS 跨域加载图片
+ * @returns 图片加载完成的 Promise
+ */
+export const drawImage = (
+  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
+  url: string,
+  mode: ImageMode = imageMode[0],
+  useCORS: boolean = false,
+) => {
+  return new Promise<void>((resolve, reject) => {
+    const loadImage = (withCORS: boolean) => {
+      const image = new Image()
+      if (withCORS) {
+        image.crossOrigin = 'anonymous'
+      }
+      image.onload = () => {
+        const { width: cW, height: cH } = canvas
+        const { width: iW, height: iH } = image
+        let dW: number, dH: number
+
+        switch (mode) {
+          case 'aspectFit':
+            dW = iW <= cW && iH <= cH ? iW : Math.min(cW / iW, cH / iH) * iW
+            dH = iW <= cW && iH <= cH ? iH : Math.min(cW / iW, cH / iH) * iH
+            break
+          case 'aspectFill':
+            dW = Math.max(cW / iW, cH / iH) * iW
+            dH = Math.max(cW / iW, cH / iH) * iH
+            break
+          case 'widthFix':
+            dW = cW
+            dH = (cW / iW) * iH
+            break
+          case 'heightFix':
+            dW = (cH / iH) * iW
+            dH = cH
+            break
+          default:
+            dW = iW <= cW && iH <= cH ? iW : Math.min(cW / iW, cH / iH) * iW
+            dH = iW <= cW && iH <= cH ? iH : Math.min(cW / iW, cH / iH) * iH
+        }
+
+        const dx = (cW - dW) / 2
+        const dy = (cH - dH) / 2
+
+        context.clearRect(0, 0, cW, cH)
+        context.drawImage(image, dx, dy, dW, dH)
+        resolve()
+      }
+
+      image.onerror = () => {
+        if (withCORS) {
+          loadImage(!withCORS)
+        } else {
+          reject(new Error('Failed to load image'))
+        }
+      }
+
+      image.src = url
+    }
+
+    loadImage(useCORS)
+  })
+}

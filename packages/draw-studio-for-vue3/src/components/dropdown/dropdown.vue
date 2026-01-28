@@ -20,7 +20,7 @@
   defineProps(dropdownProps)
   const dropdownRef = useTemplateRef<HTMLDivElement>('dropdownRef')
 
-  const visible = ref(true)
+  const visible = ref(false)
 
   const toggleVisible = () => {
     visible.value = !visible.value

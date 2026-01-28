@@ -10,18 +10,10 @@
       :width="500"
       :height="500"
       background-color="white"
+      :use-background-image="true"
+      background-image-mode="aspectFill"
+      :background-image="boy1"
       @draw="onDraw"/>
-      <DrawStudioVue3
-        v-model:line-width="lineWidth"
-        v-model:color="color"
-        :use-toolbar="true"
-        toolbar-position="top"
-        :use-history="true"
-        :max-history="20"
-        :width="500"
-        :height="500"
-        background-color="white"
-        @draw="onDraw"/>
   </div>
 </template>
 
@@ -30,6 +22,9 @@ import { ref } from 'vue';
 import DrawStudio from '@draw-studio/draw-studio-for-vue3'
 import { DrawStudioVue3 } from 'draw-studio/dist/draw-studio.js'
 import 'draw-studio/dist/draw-studio.css'
+import boy1 from './boy.jpeg'
+import boy from './boy.png'
+import girl from './girl.png'
 
 const lineWidth = ref(2)
 

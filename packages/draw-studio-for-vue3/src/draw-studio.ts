@@ -1,5 +1,5 @@
 import { ExtractPropTypes, PropType } from 'vue'
-import { Position } from '@draw-studio/utils'
+import { Position, imageMode, ImageMode } from '@draw-studio/utils'
 
 export const toolbarPosition = ['top', 'right', 'bottom', 'left'] as const
 export type ToolbarPositionType = typeof toolbarPosition[number]
@@ -17,6 +17,19 @@ export const drawStudioProps = {
     type: String,
     default: () => '#FFFFFF'
   },
+  useBackgroundImage: {
+    type: Boolean,
+    default: () => false
+  },
+  backgroundImage: {
+    type: String,
+    default: () => ''
+  },
+  backgroundImageMode: {
+    type: String as PropType<ImageMode>,
+    default: () => imageMode[0]
+  },
+
   lineWidth: {
     type: Number,
     default: () => 3
@@ -25,6 +38,7 @@ export const drawStudioProps = {
     type: String,
     default: () => '#000000'
   },
+
   useToolbar: {
     type: Boolean,
     default: () => true
