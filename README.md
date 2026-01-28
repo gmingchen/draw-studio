@@ -187,9 +187,6 @@ import 'draw-studio/dist/draw-studio.css'
 | `toolbarPosition` | `String` | `'top'` | 工具栏位置，可选值：`'top'`、`'right'`、`'bottom'`、`'left'` |
 | `useHistory` | `Boolean` | `true` | 是否启用历史记录功能 |
 | `maxHistory` | `Number` | `20` | 最大历史记录数量，范围：1-100 |
-| `tool` | `String` | `'pencil'` | 默认绘图工具，可选值：`'pencil'`、`'line'` |
-| `zoom` | `Number` | `1` | 画布缩放比例，范围：0.1-5 |
-| `readonly` | `Boolean` | `false` | 是否为只读模式，禁用绘图功能 |
 
 ## 🎉 事件
 
@@ -202,9 +199,6 @@ import 'draw-studio/dist/draw-studio.css'
 | `redo` | `canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, imageData: ImageData` | 重做操作时触发，包含当前画布状态 |
 | `clear` | `canvas: HTMLCanvasElement, context: CanvasRenderingContext2D` | 清空画布时触发 |
 | `download` | `canvas: HTMLCanvasElement, context: CanvasRenderingContext2D` | 下载图片时触发 |
-| `tool-change` | `tool: string` | 绘图工具变更时触发 |
-| `zoom-change` | `zoom: number` | 画布缩放比例变更时触发 |
-| `init` | `canvas: HTMLCanvasElement, context: CanvasRenderingContext2D` | 组件初始化完成时触发 |
 
 ### 事件处理示例
 
@@ -481,21 +475,12 @@ import 'draw-studio-vue3/dist/draw-studio.css'
   <div class="custom-toolbar">
     <!-- 自定义工具栏 -->
     <div class="toolbar-buttons">
-      <button 
-        v-for="tool in tools" 
-        :key="tool.id"
-        :class="{ active: currentTool === tool.id }"
-        @click="setTool(tool.id)"
-      >
-        {{ tool.name }}
-      </button>
-      <div class="toolbar-separator"></div>
       <button @click="undo" :disabled="!canUndo">撤销</button>
       <button @click="redo" :disabled="!canRedo">重做</button>
       <button @click="clear">清空</button>
       <button @click="download">下载</button>
     </div>
-    
+
     <!-- 颜色和线条控制 -->
     <div class="tool-controls">
       <div class="control-group">
@@ -508,7 +493,7 @@ import 'draw-studio-vue3/dist/draw-studio.css'
         <span>{{ lineWidth }}px</span>
       </div>
     </div>
-    
+
     <!-- 不带工具栏的绘图板 -->
     <DrawStudio
       ref="drawStudioRef"
@@ -531,20 +516,10 @@ import { DrawStudio } from 'draw-studio-vue3'
 import 'draw-studio-vue3/dist/draw-studio.css'
 
 const drawStudioRef = ref(null)
-const currentTool = ref('pencil')
 const color = ref('#000000')
 const lineWidth = ref(3)
 const canUndo = ref(false)
 const canRedo = ref(false)
-
-const tools = [
-  { id: 'pencil', name: '铅笔' },
-  { id: 'line', name: '直线' }
-]
-
-const setTool = (tool) => {
-  currentTool.value = tool
-}
 
 const updateColor = (event) => {
   color.value = event.target.value
