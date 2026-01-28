@@ -26,14 +26,14 @@
 
 <script lang="ts" setup>
   import { ref, reactive, useTemplateRef, computed, watch, onMounted, onUnmounted } from 'vue'
-  import { drawBoardProps, DrawBoardEmits } from './draw-board'
-  import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines } from '@draw-board/utils'
+  import { drawStudioProps, DrawStudioEmits } from './draw-studio'
+  import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines } from '@draw-studio/utils'
   import { Icon, LinePicker, ColorPicker } from './components'
 
-  const n = namespace('draw-board')
-  defineOptions({ name: 'DrawBoard' })
-  const emits = defineEmits<DrawBoardEmits>()
-  const props = defineProps(drawBoardProps)
+  const n = namespace('draw-studio')
+  defineOptions({ name: 'DrawStudio' })
+  const emits = defineEmits<DrawStudioEmits>()
+  const props = defineProps(drawStudioProps)
 
   const style = computed(() => ({
     backgroundColor: props.backgroundColor
@@ -163,7 +163,7 @@
     context.fillRect(0, 0, width, height)
     handleSaveHistory()
   }
-  const handleDownload = (name: string = `draw-board-${ Date.now() }`) => {
+  const handleDownload = (name: string = `draw-studio-${ Date.now() }`) => {
     if (!canvasRef.value) return
     const canvas = canvasRef.value!
     const link = document.createElement('a')
@@ -255,6 +255,6 @@
 </script>
 
 <style lang="scss" scoped>
-  @use '@draw-board/theme-chalk/src/draw-board.scss';
+  @use '@draw-studio/theme-chalk/src/draw-studio.scss';
 </style>
 

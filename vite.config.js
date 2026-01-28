@@ -17,7 +17,7 @@ export default defineConfig(() => {
     build: {
       lib: {
         entry: resolve(__dirname, 'src/index.ts'),
-        name: 'DrawBoard',
+        name: 'DrawStudio',
         formats: ['es', 'umd', 'cjs']
       },
       rollupOptions: {

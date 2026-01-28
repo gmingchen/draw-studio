@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
   import { computed, CSSProperties } from 'vue'
-  import { namespace } from '@draw-board/utils';
+  import { namespace } from '@draw-studio/utils';
   import * as Svgs from './svgs/index'
   import { iconProps } from './icon'
 
@@ -32,5 +32,5 @@
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/icon.scss';
+@use '@draw-studio/theme-chalk/src/icon.scss';
 </style>

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { namespace } from '@draw-board/utils'
+  import { namespace } from '@draw-studio/utils'
   import { colorPickerProps, ColorPickerEmits } from './color-picker'
 
   const n = namespace('color-picker')
@@ -23,5 +23,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @use '@draw-board/theme-chalk/src/color-picker.scss';
+  @use '@draw-studio/theme-chalk/src/color-picker.scss';
 </style>

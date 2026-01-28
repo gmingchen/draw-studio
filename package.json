@@ -4,8 +4,8 @@
   "version": "0.0.12",
   "description": "A powerful drawing board plugin for Vue 3 with customizable tools and artistic styles",
   "type": "module",
-  "main": "dist/draw-board.umd.js",
-  "module": "dist/draw-board.mjs",
+  "main": "dist/draw-studio.umd.js",
+  "module": "dist/draw-studio.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -28,11 +28,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gumingchen/draw-board-vue3.git"
+    "url": "https://github.com/gmingchen/draw-studio.git"
   },
-  "homepage": "https://github.com/gumingchen/draw-board-vue3#readme",
+  "homepage": "https://github.com/gmingchen/draw-studio#readme",
   "bugs": {
-    "url": "https://github.com/gumingchen/draw-board-vue3/issues"
+    "url": "https://github.com/gmingchen/draw-studio/issues"
   },
   "scripts": {
     "dev:vue3": "pnpm -C play/vue3 dev",
@@ -48,9 +48,9 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@draw-board/draw-board-for-vue3": "workspace:*",
-    "@draw-board/theme-chalk": "workspace:*",
-    "@draw-board/utils": "workspace:*",
+    "@draw-studio/draw-studio-for-vue3": "workspace:*",
+    "@draw-studio/theme-chalk": "workspace:*",
+    "@draw-studio/utils": "workspace:*",
     "sass": "^1.97.3"
   },
   "devDependencies": {

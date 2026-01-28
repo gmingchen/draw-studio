@@ -8,13 +8,13 @@ importers:
 
   .:
     dependencies:
-      '@draw-board/draw-board-for-vue3':
+      '@draw-studio/draw-studio-for-vue3':
         specifier: workspace:*
-        version: link:packages/draw-board-for-vue3
-      '@draw-board/theme-chalk':
+        version: link:packages/draw-studio-for-vue3
+      '@draw-studio/theme-chalk':
         specifier: workspace:*
         version: link:packages/theme-chalk
-      '@draw-board/utils':
+      '@draw-studio/utils':
         specifier: workspace:*
         version: link:packages/utils
       sass:
@@ -55,12 +55,12 @@ importers:
         specifier: ^3.5.0
         version: 3.5.27(typescript@5.9.3)
 
-  packages/draw-board-for-vue3:
+  packages/draw-studio-for-vue3:
     devDependencies:
-      '@draw-board/theme-chalk':
+      '@draw-studio/theme-chalk':
         specifier: workspace:*
         version: link:../theme-chalk
-      '@draw-board/utils':
+      '@draw-studio/utils':
         specifier: workspace:*
         version: link:../utils
 

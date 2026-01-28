@@ -1,10 +1,10 @@
 import { ExtractPropTypes, PropType } from 'vue'
-import { Position } from '@draw-board/utils'
+import { Position } from '@draw-studio/utils'
 
 export const toolbarPosition = ['top', 'right', 'bottom', 'left'] as const
 export type ToolbarPositionType = typeof toolbarPosition[number]
 
-export const drawBoardProps = {
+export const drawStudioProps = {
   width: {
     type: Number,
     default: () => 500
@@ -43,9 +43,9 @@ export const drawBoardProps = {
   }
 }
 
-export type DrawBoardType = ExtractPropTypes<typeof drawBoardProps>
+export type DrawStudioType = ExtractPropTypes<typeof drawStudioProps>
 
-export interface DrawBoardEmits {
+export interface DrawStudioEmits {
   (e: 'update:line-width', lineWidth: number): void
   (e: 'update:color', color: string): void
   (e: 'draw', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, position: Position): void

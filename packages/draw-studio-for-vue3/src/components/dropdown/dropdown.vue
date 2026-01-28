@@ -13,7 +13,7 @@
 
 <script lang="ts" setup>
   import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
-  import { namespace } from '@draw-board/utils';
+  import { namespace } from '@draw-studio/utils';
   import { dropdownProps } from './dropdown'
 
   const n = namespace('dropdown-picker')
@@ -51,5 +51,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @use '@draw-board/theme-chalk/src/dropdown.scss';
+  @use '@draw-studio/theme-chalk/src/dropdown.scss';
 </style>

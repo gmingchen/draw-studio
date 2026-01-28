@@ -1,14 +1,14 @@
 {
-  "name": "@draw-board/draw-board-for-vue3",
-  "version": "1.0.0",
+  "name": "@draw-studio/draw-studio-for-vue3",
+  "version": "0.0.0",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@draw-board/theme-chalk": "workspace:*",
-    "@draw-board/utils": "workspace:*"
+    "@draw-studio/theme-chalk": "workspace:*",
+    "@draw-studio/utils": "workspace:*"
   },
   "keywords": [],
   "author": "",

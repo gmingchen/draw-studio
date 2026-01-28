@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { namespace } from '@draw-board/utils';
+  import { namespace } from '@draw-studio/utils';
   import { rangePickerProps } from './range-picker'
 
   const n = namespace('range-picker')
@@ -23,5 +23,5 @@
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/range-picker.scss';
+@use '@draw-studio/theme-chalk/src/range-picker.scss';
 </style>

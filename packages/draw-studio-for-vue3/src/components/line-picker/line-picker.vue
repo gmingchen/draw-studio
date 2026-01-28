@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { namespace } from '@draw-board/utils'
+  import { namespace } from '@draw-studio/utils'
   import Dropdown from '../dropdown/dropdown.vue'
   import Icon from '../icon/icon.vue'
   import { linePickerProps, LinePickerEmits } from './line-picker'
@@ -28,5 +28,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @use '@draw-board/theme-chalk/src/line-picker.scss';
+  @use '@draw-studio/theme-chalk/src/line-picker.scss';
 </style>

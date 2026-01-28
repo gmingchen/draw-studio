@@ -1,9 +1,9 @@
 @use 'mixins' as *;
 
-$toolbar: #{$namespace}-draw-board#{$element-separator}toolbar;
+$toolbar: #{$namespace}-draw-studio#{$element-separator}toolbar;
 $icon: #{$namespace}-icon;
 
-@include b(draw-board) {
+@include b(draw-studio) {
   display: flex;
   gap: 10px;
   width: fit-content;

@@ -1,11 +1,8 @@
 {
-  "name": "@draw-board/theme-chalk",
-  "version": "1.0.0",
+  "name": "@draw-studio/theme-chalk",
+  "version": "0.0.0",
   "description": "",
   "main": "index.css",
-  "module": "index.css",
-  "unpkg": "index.css",
-  "jsdelivr": "index.css",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

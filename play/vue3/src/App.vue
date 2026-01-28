@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <DrawBoard
+    <DrawStudio
       v-model:line-width="lineWidth"
       v-model:color="color"
       :use-toolbar="true"
@@ -11,7 +11,7 @@
       :height="500"
       background-color="white"
       @draw="onDraw"/>
-      <DrawBoardVue3
+      <DrawStudioVue3
         v-model:line-width="lineWidth"
         v-model:color="color"
         :use-toolbar="true"
@@ -27,8 +27,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import DrawBoard from '@draw-board/draw-board-for-vue3'
-import { DrawBoardVue3 } from 'draw-studio/dist/draw-studio.js'
+import DrawStudio from '@draw-studio/draw-studio-for-vue3'
+import { DrawStudioVue3 } from 'draw-studio/dist/draw-studio.js'
 import 'draw-studio/dist/draw-studio.css'
 
 const lineWidth = ref(2)
