@@ -10,21 +10,18 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef, getCurrentInstance } from 'vue'
-import { namespace } from '@draw-board/utils'
-import { colorPickerProps, ColorPickerEmits } from './color-picker'
+  import { namespace } from '@draw-board/utils'
+  import { colorPickerProps, ColorPickerEmits } from './color-picker'
 
-const n = namespace('color-picker')
-const props = defineProps(colorPickerProps)
-const emits = defineEmits<ColorPickerEmits>()
-const instance = getCurrentInstance()
-const inputRef = useTemplateRef('inputRef')
+  const n = namespace('color-picker')
+  defineProps(colorPickerProps)
+  const emits = defineEmits<ColorPickerEmits>()
 
-const onInput = (event) => {
-  emits('input', event.target.value)
-}
+  const onInput = (event: InputEvent) => {
+    emits('input', (event.target as HTMLInputElement).value)
+  }
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/color-picker.scss';
+  @use '@draw-board/theme-chalk/src/color-picker.scss';
 </style>

@@ -13,20 +13,20 @@
 </template>
 
 <script lang="ts" setup>
-import { namespace } from '@draw-board/utils'
-import Dropdown from '../dropdown/dropdown.vue'
-import Icon from '../icon/icon.vue'
-import { linePickerProps, LinePickerEmits } from './line-picker'
+  import { namespace } from '@draw-board/utils'
+  import Dropdown from '../dropdown/dropdown.vue'
+  import Icon from '../icon/icon.vue'
+  import { linePickerProps, LinePickerEmits } from './line-picker'
 
-const n = namespace('line-picker')
-const props = defineProps(linePickerProps)
-const emits = defineEmits<LinePickerEmits>()
+  const n = namespace('line-picker')
+  defineProps(linePickerProps)
+  const emits = defineEmits<LinePickerEmits>()
 
-const onClick = (size: number) => {
-  emits('change', size)
-}
+  const onClick = (size: number) => {
+    emits('change', size)
+  }
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/line-picker.scss';
+  @use '@draw-board/theme-chalk/src/line-picker.scss';
 </style>

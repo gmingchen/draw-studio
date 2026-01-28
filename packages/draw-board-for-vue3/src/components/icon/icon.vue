@@ -10,7 +10,7 @@
 <script lang="ts" setup>
   import { computed, CSSProperties } from 'vue'
   import { namespace } from '@draw-board/utils';
-  import * as Svgs from './svgs'
+  import * as Svgs from './svgs/index'
   import { iconProps } from './icon'
 
   const n = namespace('icon')
@@ -20,7 +20,7 @@
   const { name, size } = defineProps(iconProps)
 
   const svg = computed(() => {
-    return Svgs[name]
+    return name ? (Svgs as Record<string, any>)[name] : undefined
   })
 
   const style = computed<CSSProperties>(() => {

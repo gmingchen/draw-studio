@@ -1,29 +1,69 @@
 {
-  "name": "draw-board",
-  "version": "1.0.0",
-  "description": "pnpm TS Monorepo for Vue 3 npm plugins",
-  "private": true,
-  "scripts": {
-    "lint": "eslint . --ext .ts,.vue",
-    "dev:vue3": "pnpm -C play/vue3 dev"
+  "name": "draw-studio",
+  "private": false,
+  "version": "0.0.12",
+  "description": "A powerful drawing board plugin for Vue 3 with customizable tools and artistic styles",
+  "type": "module",
+  "main": "dist/draw-board.umd.js",
+  "module": "dist/draw-board.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "vue3",
+    "drawing-board",
+    "canvas",
+    "sketch",
+    "art",
+    "illustration",
+    "ink-painting",
+    "vue-component",
+    "typescript"
+  ],
+  "author": {
+    "name": "gumingchen",
+    "email": "gumingchen@foxmail.com"
   },
-  "devDependencies": {
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gumingchen/draw-board-vue3.git"
+  },
+  "homepage": "https://github.com/gumingchen/draw-board-vue3#readme",
+  "bugs": {
+    "url": "https://github.com/gumingchen/draw-board-vue3/issues"
+  },
+  "scripts": {
+    "dev:vue3": "pnpm -C play/vue3 dev",
+    "lib": "vite build",
+    "pub": "npm publish --access public",
+    "lp": "pnpm run lib && pnpm run pub"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
     "@draw-board/draw-board-for-vue3": "workspace:*",
     "@draw-board/theme-chalk": "workspace:*",
     "@draw-board/utils": "workspace:*",
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "sass": "^1.97.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@vue/eslint-config-typescript": "^14.1.4",
     "eslint": "^8.0.0",
     "eslint-plugin-vue": "^9.0.0",
     "typescript": "^5.0.0",
+    "typescript-eslint": "^8.17.0",
+    "vite": "^7.0.0",
+    "vite-plugin-dts": "^4.5.4",
     "vue": "^3.5.0"
-  },
-  "engines": {
-    "node": ">=16"
-  },
-  "packageManager": "pnpm@8.0.0",
-  "dependencies": {
-    "sass": "^1.97.3"
   }
 }

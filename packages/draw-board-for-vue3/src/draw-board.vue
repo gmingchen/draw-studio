@@ -203,11 +203,11 @@
 
   const onUndo = () => {
     const imageData = handleUndo()
-    emits('undo', canvasRef.value!, context!, imageData)
+    emits('undo', canvasRef.value!, context!, imageData!)
   }
   const onRedo = () => {
     const imageData = handleRedo()
-    emits('redo', canvasRef.value!, context!, imageData)
+    emits('redo', canvasRef.value!, context!, imageData!)
   }
   const onClear = () => {
     handleClear()

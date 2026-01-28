@@ -10,16 +10,16 @@
 </template>
 
 <script lang="ts" setup>
-import { namespace } from '@draw-board/utils';
-import { rangePickerProps } from './range-picker'
+  import { namespace } from '@draw-board/utils';
+  import { rangePickerProps } from './range-picker'
 
-const n = namespace('range-picker')
-const props = defineProps(rangePickerProps)
-const emits = defineEmits(['input'])
+  const n = namespace('range-picker')
+  defineProps(rangePickerProps)
+  const emits = defineEmits(['input'])
 
-const onInput = (event: Event) => {
-  emits('input', +event.target.value)
-}
+  const onInput = (event: InputEvent) => {
+    emits('input', (event.target as HTMLInputElement).value)
+  }
 </script>
 
 <style lang="scss" scoped>

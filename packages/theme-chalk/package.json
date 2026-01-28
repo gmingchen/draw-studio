@@ -2,11 +2,14 @@
   "name": "@draw-board/theme-chalk",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.css",
+  "module": "index.css",
+  "unpkg": "index.css",
+  "jsdelivr": "index.css",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

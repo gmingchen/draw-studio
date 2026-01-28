@@ -1,9 +1,9 @@
 <template>
-  <div :class="[n.b()]">
+  <div ref="dropdownRef" :class="[n.b()]">
     <div @click="toggleVisible">
       <slot></slot>
     </div>
-    <div :class="n.e('content')" v-show="visible">
+    <div :class="n.e('content')" v-if="visible">
       <div :class="n.e('scroll')">
         <slot name="content"></slot>
       </div>
@@ -12,21 +12,22 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
   import { namespace } from '@draw-board/utils';
   import { dropdownProps } from './dropdown'
 
   const n = namespace('dropdown-picker')
-  const props = defineProps(dropdownProps)
+  defineProps(dropdownProps)
+  const dropdownRef = useTemplateRef<HTMLDivElement>('dropdownRef')
 
-  const visible = ref(false)
+  const visible = ref(true)
 
   const toggleVisible = () => {
     visible.value = !visible.value
   }
 
   const handleClickOutside = (event: MouseEvent) => {
-    const dropdown = document.querySelector(`.${n.b()}`)
+    const dropdown = dropdownRef.value!
     if (dropdown && !dropdown.contains(event.target as Node)) {
       visible.value = false
     }
@@ -50,5 +51,5 @@
 </script>
 
 <style lang="scss" scoped>
-@use '@draw-board/theme-chalk/src/dropdown.scss';
+  @use '@draw-board/theme-chalk/src/dropdown.scss';
 </style>

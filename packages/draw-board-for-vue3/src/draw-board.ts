@@ -6,46 +6,42 @@ export type ToolbarPositionType = typeof toolbarPosition[number]
 
 export const drawBoardProps = {
   width: {
-    type: [Number, String],
-    default: 500
+    type: Number,
+    default: () => 500
   },
   height: {
-    type: [Number, String],
-    default: 500
+    type: Number,
+    default: () => 500
   },
   backgroundColor: {
     type: String,
-    default: '#FFFFFF'
+    default: () => '#FFFFFF'
   },
-
   lineWidth: {
     type: Number,
-    default: 3
+    default: () => 3
   },
   color: {
     type: String,
-    default: '#000000'
+    default: () => '#000000'
   },
-
   useToolbar: {
     type: Boolean,
-    default: true
+    default: () => true
   },
   toolbarPosition: {
     type: String as PropType<ToolbarPositionType>,
-    default: toolbarPosition[0]
+    default: () => toolbarPosition[0]
   },
-
-
   useHistory: {
     type: Boolean,
-    default: true
+    default: () => true
   },
   maxHistory: {
     type: Number,
-    default: 20
+    default: () => 20
   }
-} as const
+}
 
 export type DrawBoardType = ExtractPropTypes<typeof drawBoardProps>
 

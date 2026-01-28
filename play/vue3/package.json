@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "draw-studio": "workspace:*",
     "vue": "^3.5.0"
   },
   "devDependencies": {
