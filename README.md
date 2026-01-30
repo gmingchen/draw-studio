@@ -270,14 +270,25 @@ draw-studio/
 └── README.md              # 项目文档
 ```
 
-## License
-
-MIT
-
 ## 联系方式
-- **QQ**：`1240235512`
-- **微信**：`Gy1240235512`
-- **Email**：[gumingchen@example.com](mailto:gumingchen@example.com)
+
 - **GitHub**: [gmingchen/draw-studio](https://github.com/gmingchen/draw-studio)
 - **Issue**: 欢迎在 [GitHub Issues](https://github.com/gmingchen/draw-studio/issues) 提出问题和建议
 - **贡献**: 欢迎提交 Pull Request 来改进这个项目
+
+### 扫码交流
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <p>个人微信</p>
+        <img src="./contact/wechat.png" alt="个人微信" width="200" />
+      </td>
+      <td align="center">
+        <p>微信群</p>
+        <img src="./contact/wechat-group.jpg" alt="微信群" width="200" />
+      </td>
+    </tr>
+  </table>
+</div>
