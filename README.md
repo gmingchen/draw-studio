@@ -20,6 +20,8 @@
 
 基于 Canvas 的 Vue 3 绘图板组件，支持撤销/重做、背景图片、H5 移动端等功能。
 
+<img src="./contact/demo.webp" alt="GitHub 星星" />
+
 ## 特性
 
 - ✏️ **自由绘制** - 支持铅笔等绘图工具

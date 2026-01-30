@@ -1,6 +1,5 @@
 <template>
   <div :class="[n.b(), n.m(props.toolbarPosition)]">
-    <div @click="test">test</div>
     <div :class="[n.e('toolbar')]" :style="style" v-if="useToolbar">
       <template v-if="useHistory">
         <Icon :class="n.is('disable', !canUndo)" name="Left" @click="onUndo" />
@@ -70,10 +69,6 @@
   })
   const canUndo = computed(() => history.active > 0)
   const canRedo = computed(() => history.active < history.list.length - 1)
-
-  const test = () => {
-    handleCurrentDrawLines(drawingPositions.value)
-  }
 
   const insideLineWidth = ref(props.lineWidth)
   watch(() => props.lineWidth, (value: number) => {
