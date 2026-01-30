@@ -1,15 +1,15 @@
 <template>
   <div :class="[n.b(), n.m(props.toolbarPosition)]">
+    <div @click="test">test</div>
     <div :class="[n.e('toolbar')]" :style="style" v-if="useToolbar">
       <template v-if="useHistory">
-        <Icon :class="n.is('disable', !canUndo)" name="Left" @click="onUndo"></Icon>
-        <Icon :class="n.is('disable', !canRedo)" name="Right" @click="onRedo"></Icon>
+        <Icon :class="n.is('disable', !canUndo)" name="Left" @click="onUndo" />
+        <Icon :class="n.is('disable', !canRedo)" name="Right" @click="onRedo" />
       </template>
-      <Icon name="Broom" @click="onClear"></Icon>
-      <LinePicker v-model="insideLineWidth" @change="onLineWidthChange"></LinePicker>
-      <ColorPicker v-model="insideColor" @input="onColorChange">
-      </ColorPicker>
-      <Icon name="Download" @click="onDownload"></Icon>
+      <Icon name="Broom" @click="onClear" />
+      <LinePicker v-model="insideLineWidth" @change="onLineWidthChange" />
+      <ColorPicker v-model="insideColor" @input="onColorChange" />
+      <Icon name="Download" @click="onDownload" />
     </div>
     <canvas
       ref="canvasRef"
@@ -22,16 +22,21 @@
       @mouseenter="onMouseEnter"
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
-      @touchend="onTouchEnd">
-    </canvas>
+      @touchend="onTouchEnd" />
   </div>
 </template>
 
 <script lang="ts" setup>
   import { ref, reactive, useTemplateRef, computed, watch, onMounted, onUnmounted } from 'vue'
-  import { drawStudioProps, DrawStudioEmits } from './draw-studio'
-  import { namespace, Position, Event, getEventPosition, determineIsInside, getEdgePosition, drawLines, drawImage } from '@draw-studio/utils'
   import { Icon, LinePicker, ColorPicker } from './components'
+  import {
+    drawStudioProps,
+    DrawStudioEmits, DrawMode, DrawAction
+  } from './draw-studio'
+  import {
+    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition, drawLines, drawImage,
+    Position, Event
+  } from '@draw-studio/utils'
 
   const n = namespace('draw-studio')
   defineOptions({ name: 'DrawStudio' })
@@ -44,16 +49,21 @@
 
   const canvasRef = useTemplateRef<HTMLCanvasElement>('canvasRef')
   let context: CanvasRenderingContext2D | null = null
+  let offscreenCanvas: HTMLCanvasElement | null = null
+  let offscreenContext: CanvasRenderingContext2D | null = null
+
   let globalMouseMoveHandler: ((event: Event) => void) | null = null
   let globalMouseUpHandler: ((event: Event) => void) | null = null
 
   const isDrawing = ref(false)
+  const drawingPositions = ref<Position[]>([])
+
   const lastPosition = reactive<Position>({ x: 0, y: 0 })
   const lastIsInside = ref(false)
 
   const history = reactive<{
     active: number,
-    list: ImageData[]
+    list: DrawAction[]
   }>({
     active: -1,
     list: []
@@ -61,6 +71,9 @@
   const canUndo = computed(() => history.active > 0)
   const canRedo = computed(() => history.active < history.list.length - 1)
 
+  const test = () => {
+    handleCurrentDrawLines(drawingPositions.value)
+  }
 
   const insideLineWidth = ref(props.lineWidth)
   watch(() => props.lineWidth, (value: number) => {
@@ -70,56 +83,105 @@
   watch(() => props.color, (value: string) => {
     insideColor.value = value
   })
-  
 
-  const handleDrawLines = (positions: Position[]) => {
+  const handleCurrentDrawLines = (positions: Position[]) => {
     drawLines(context!, positions, insideLineWidth.value, insideColor.value)
   }
 
-
-
-  const handleSaveHistory = () => {
+  const handleSaveHistory = (mode: DrawMode) => {
     if (!props.useHistory) return
-    const { width, height } = canvasRef.value!
-    const image = context!.getImageData(0, 0, width, height)
+    if (mode !== 'reset' && drawingPositions.value.length === 0) return
+    const timestamp = +Date.now()
+    const drawAction: DrawAction = {
+      id: timestamp,
+      timestamp: timestamp,
+      mode: mode,
+      lineWidth: insideLineWidth.value,
+      color: insideColor.value,
+      positions: [...drawingPositions.value],
+    }
     if (history.active < history.list.length - 1) {
       history.list.splice(history.active + 1)
     }
-    history.list.push(image)
+    history.list.push(drawAction)
     history.active = history.list.length - 1
+    drawingPositions.value = []
   }
 
-  const handleRest = () => {
+  const handleDrawHistory = async (active: number) => {
+    if (!context) return
+    let list = history.list.slice(0, active + 1)
+    let startIndex = 0
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].mode === 'reset') {
+        startIndex = i + 1
+        break
+      }
+    }
+    list = list.slice(startIndex)
+    const map = new Map<number, DrawAction>()
+    list.forEach(item => map.set(item.id, item))
+    list = Array.from(map.values())
+
+    const { width, height, backgroundColor, useBackgroundImage, backgroundImage, backgroundImageMode, useOffscreen } = props
+    if (useOffscreen && offscreenContext && offscreenCanvas) {
+      offscreenContext.fillStyle = backgroundColor
+      offscreenContext.fillRect(0, 0, width, height)
+      if (useBackgroundImage && backgroundImage) {
+        await drawImage(offscreenCanvas, offscreenContext, backgroundImage, backgroundImageMode)
+      }
+    } else {
+      await handleRest()
+    }
+
+    for (const action of list) {
+      if (action.mode === 'pencil' && action.positions.length > 0) {
+        drawLines(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth, action.color)
+      }
+    }
+
+    if (useOffscreen && offscreenContext && offscreenCanvas) {
+      context.clearRect(0, 0, width, height)
+      context.drawImage(offscreenCanvas, 0, 0)
+    }
+  }
+
+  const handleRest = async () => {
     if (!context) return
     const { width, height, backgroundColor, useBackgroundImage, backgroundImage, backgroundImageMode } = props
     context.fillStyle = backgroundColor
     context.fillRect(0, 0, width, height)
     if (canvasRef.value && useBackgroundImage && backgroundImage) {
-      drawImage(canvasRef.value, context, backgroundImage, backgroundImageMode)
+      await drawImage(canvasRef.value, context, backgroundImage, backgroundImageMode)
     }
-    handleSaveHistory()
+  }
+
+  const handlePencilDraw = () => {
+    const canvas = canvasRef.value
+    if (!canvas) return
   }
 
   const handleGlobalMouseMove = (event: Event) => {
     const canvas = canvasRef.value
     if (!isDrawing.value || !canvas) return
     const eventPosition = getEventPosition(canvas, event)
-    // 判断鼠标是否在画布内
-    const isInside = determineIsInside(canvas, event)
+    const isInside = determineIsInsideByEvent(canvas, event)
     if (isInside) {
       if(lastIsInside.value) {
         event.preventDefault()
-        handleDrawLines([lastPosition, eventPosition])
+        handleCurrentDrawLines([lastPosition, eventPosition])
       } else {
         const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-        handleDrawLines([lastPosition, edgePosition, eventPosition])
+        handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
       }
     } else {
       if(lastIsInside.value) {
         const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-        handleDrawLines([lastPosition, edgePosition])
+        handleCurrentDrawLines([lastPosition, edgePosition])
+        drawingPositions.value.push(edgePosition)
       }
     }
+    drawingPositions.value.push(eventPosition)
     lastPosition.x = eventPosition.x
     lastPosition.y = eventPosition.y
     lastIsInside.value = isInside
@@ -141,6 +203,7 @@
     lastPosition.x = x
     lastPosition.y = y
     lastIsInside.value = true
+    drawingPositions.value.push({ x, y })
 
     if (!globalMouseMoveHandler) {
       globalMouseMoveHandler = handleGlobalMouseMove
@@ -153,7 +216,7 @@
     if (isDrawing.value) {
       isDrawing.value = false
       lastIsInside.value = false
-      handleSaveHistory()
+      handleSaveHistory('pencil')
       handleGlobalListenersRemove()
     }
   }
@@ -162,20 +225,21 @@
   const handleUndo = () => {
     if (history.active <= 0 || !context) return
     history.active--
-    const imageData = history.list[history.active]
-    context.putImageData(imageData, 0, 0)
+    handleDrawHistory(history.active)
+    const imageData = context!.getImageData(0, 0, props.width, props.height)
     return imageData
   }
   const handleRedo = () => {
     if (history.active >= history.list.length - 1 || !context) return
     history.active++
-    const imageData = history.list[history.active]
-    context.putImageData(imageData, 0, 0)
+    handleDrawHistory(history.active)
+    const imageData = context!.getImageData(0, 0, props.width, props.height)
     return imageData
   }
-  const handleClear = () => {
+  const handleClear = async () => {
     if (!context) return
-    handleRest()
+    await handleRest()
+    handleSaveHistory('reset')
   }
   const handleDownload = (name: string = `draw-studio-${ Date.now() }`) => {
     if (!canvasRef.value) return
@@ -190,7 +254,7 @@
   const onMouseDown = (event: Event) => {
     if (!canvasRef.value) return
     // 判断鼠标是否在canvas内
-    const isInside = determineIsInside(canvasRef.value, event)
+    const isInside = determineIsInsideByEvent(canvasRef.value, event)
     if (!isInside) return
     if ('buttons' in event && event.buttons !== 1) return
     handleStartDraw(event)
@@ -206,7 +270,7 @@
     if (!lastIsInside.value) {
       const canvas = canvasRef.value!
       const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-      handleDrawLines([lastPosition, edgePosition, eventPosition])
+      handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
     }
     lastPosition.x = eventPosition.x
     lastPosition.y = eventPosition.y
@@ -222,10 +286,11 @@
     if (!isDrawing.value || !canvas || !context) return
     event.preventDefault()
     const eventPosition = getEventPosition(canvas, event)
-    handleDrawLines([lastPosition, eventPosition])
+    handleCurrentDrawLines([lastPosition, eventPosition])
     lastPosition.x = eventPosition.x
     lastPosition.y = eventPosition.y
-    emits('draw', canvas, context, { x: eventPosition.x, y: eventPosition.y })
+    drawingPositions.value.push(eventPosition)
+    emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
   }
   const onTouchEnd = () => {
     handleStopDraw()
@@ -256,11 +321,19 @@
     emits('download', canvasRef.value!, context!)
   }
 
-  const init = () => {
+  const init = async () => {
     if (!canvasRef.value) return
     context = canvasRef.value.getContext('2d')
     if (!context) return
-    handleRest()
+    if (props.useOffscreen) {
+      const { width, height } = props
+      offscreenCanvas = document.createElement('canvas')
+      offscreenCanvas.width = width
+      offscreenCanvas.height = height
+      offscreenContext = offscreenCanvas.getContext('2d')
+    }
+    await handleRest()
+    handleSaveHistory('reset')
   }
 
   onMounted(() => {

@@ -6,6 +6,7 @@
       :use-toolbar="true"
       toolbar-position="top"
       :use-history="true"
+      :use-offscreen="true"
       :max-history="20"
       :width="500"
       :height="500"

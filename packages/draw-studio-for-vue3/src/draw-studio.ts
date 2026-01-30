@@ -54,6 +54,10 @@ export const drawStudioProps = {
   maxHistory: {
     type: Number,
     default: () => 20
+  },
+  useOffscreen: {
+    type: Boolean,
+    default: () => false
   }
 }
 
@@ -67,4 +71,15 @@ export interface DrawStudioEmits {
   (e: 'redo', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, imageData: ImageData): void
   (e: 'clear', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void
   (e: 'download', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void
+}
+
+export const drawMode = ['reset', 'pencil', 'pen', 'circle', 'rectangle'] as const
+export type DrawMode = typeof drawMode[number]
+export interface DrawAction {
+  id: number,
+  timestamp: number,
+  mode: DrawMode
+  lineWidth: number
+  color: string
+  positions: Position[]
 }

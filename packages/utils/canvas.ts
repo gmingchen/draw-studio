@@ -82,15 +82,27 @@ export const getEdgePosition = (canvas: HTMLCanvasElement, position1: Position, 
 }
 
 /**
+ * 判断坐标点是否在画布内
+ * @param canvas 画布元素
+ * @param position 坐标点
+ * @returns 是否在画布内
+ */
+export const determineIsInsideByPosition = (canvas: HTMLCanvasElement, position: Position): boolean => {
+  const { top, bottom, left, right } = canvas.getBoundingClientRect()
+  const isInside = position.x >= left && position.x <= right && position.y >= top && position.y <= bottom
+  return isInside
+}
+
+/**
  * 判断鼠标事件是否在画布内
  * @param event 鼠标事件或触摸事件
  * @param canvas 画布元素
  * @returns 是否在画布内
  */
-export const determineIsInside = (canvas: HTMLCanvasElement, event: Event): boolean => {
+export const determineIsInsideByEvent = (canvas: HTMLCanvasElement, event: Event): boolean => {
   const { clientX, clientY } = 'touches' in event ? event.touches[0] : event
-  const { top, bottom, left, right } = canvas.getBoundingClientRect()
-  const isInside = clientX >= left && clientX <= right && clientY >= top && clientY <= bottom
+  const position = { x: clientX, y: clientY }
+  const isInside = determineIsInsideByPosition(canvas, position)
   return isInside
 }
 
@@ -101,7 +113,7 @@ export const determineIsInside = (canvas: HTMLCanvasElement, event: Event): bool
  * @param width 线宽
  * @param color 线色
  */
-export const drawLines = (context: CanvasRenderingContext2D, positions: Array<Position>, width: number, color: string ) => {
+export const drawLines = (context: CanvasRenderingContext2D, positions: Array<Position>, width: number, color: string) => {
   context.beginPath()
   positions.forEach(({ x, y }, index) => {
     if (index === 0) {
