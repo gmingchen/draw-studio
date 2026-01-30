@@ -1,8 +1,11 @@
 import { ExtractPropTypes, PropType } from 'vue'
 import { Position, imageMode, ImageMode } from '@draw-studio/utils'
 
-export const toolbarPosition = ['top', 'right', 'bottom', 'left'] as const
-export type ToolbarPositionType = typeof toolbarPosition[number]
+export const modes = ['pencil', 'pen',/*  'circle', 'rectangle' */] as const
+export type ModeType = typeof modes[number]
+
+export const toolbarPositions= ['top', 'right', 'bottom', 'left'] as const
+export type ToolbarPositionType = typeof toolbarPositions[number]
 
 export const drawStudioProps = {
   width: {
@@ -30,6 +33,10 @@ export const drawStudioProps = {
     default: () => imageMode[0]
   },
 
+  mode: {
+    type: String as PropType<ModeType>,
+    default: () => modes[0]
+  },
   lineWidth: {
     type: Number,
     default: () => 3
@@ -45,7 +52,7 @@ export const drawStudioProps = {
   },
   toolbarPosition: {
     type: String as PropType<ToolbarPositionType>,
-    default: () => toolbarPosition[0]
+    default: () => toolbarPositions[0]
   },
   useHistory: {
     type: Boolean,
@@ -64,6 +71,7 @@ export const drawStudioProps = {
 export type DrawStudioType = ExtractPropTypes<typeof drawStudioProps>
 
 export interface DrawStudioEmits {
+  (e: 'update:mode', mode: ModeType): void
   (e: 'update:line-width', lineWidth: number): void
   (e: 'update:color', color: string): void
   (e: 'draw', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, position: Position): void
@@ -73,12 +81,15 @@ export interface DrawStudioEmits {
   (e: 'download', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void
 }
 
-export const drawMode = ['reset', 'pencil', 'pen', 'circle', 'rectangle'] as const
-export type DrawMode = typeof drawMode[number]
+export enum ActionMode {
+  RESET = 'reset',
+}
+export const actionModes = [ActionMode.RESET, ...modes] as const
+export type DrawActionModeType = typeof actionModes[number]
 export interface DrawAction {
   id: number,
   timestamp: number,
-  mode: DrawMode
+  mode: DrawActionModeType,
   lineWidth: number
   color: string
   positions: Position[]

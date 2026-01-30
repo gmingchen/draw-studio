@@ -6,6 +6,7 @@
         <Icon :class="n.is('disable', !canRedo)" name="Right" @click="onRedo" />
       </template>
       <Icon name="Broom" @click="onClear" />
+      <ModePicker v-model="insideMode" @change="onModeChange" />
       <LinePicker v-model="insideLineWidth" @change="onLineWidthChange" />
       <ColorPicker v-model="insideColor" @input="onColorChange" />
       <Icon name="Download" @click="onDownload" />
@@ -27,10 +28,10 @@
 
 <script lang="ts" setup>
   import { ref, reactive, useTemplateRef, computed, watch, onMounted, onUnmounted } from 'vue'
-  import { Icon, LinePicker, ColorPicker } from './components'
+  import { Icon, ModePicker, LinePicker, ColorPicker } from './components'
   import {
     drawStudioProps,
-    DrawStudioEmits, DrawMode, DrawAction
+    DrawStudioEmits, ModeType, ActionMode, DrawActionModeType, DrawAction,
   } from './draw-studio'
   import {
     namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition, drawLines, drawImage,
@@ -70,6 +71,10 @@
   const canUndo = computed(() => history.active > 0)
   const canRedo = computed(() => history.active < history.list.length - 1)
 
+  const insideMode = ref(props.mode)
+  watch(() => props.mode, (value: ModeType) => {
+    insideMode.value = value
+  })
   const insideLineWidth = ref(props.lineWidth)
   watch(() => props.lineWidth, (value: number) => {
     insideLineWidth.value = value
@@ -83,7 +88,7 @@
     drawLines(context!, positions, insideLineWidth.value, insideColor.value)
   }
 
-  const handleSaveHistory = (mode: DrawMode) => {
+  const handleSaveHistory = (mode: DrawActionModeType) => {
     if (!props.useHistory) return
     if (mode !== 'reset' && drawingPositions.value.length === 0) return
     const timestamp = +Date.now()
@@ -211,7 +216,7 @@
     if (isDrawing.value) {
       isDrawing.value = false
       lastIsInside.value = false
-      handleSaveHistory('pencil')
+      handleSaveHistory(props.mode)
       handleGlobalListenersRemove()
     }
   }
@@ -234,7 +239,7 @@
   const handleClear = async () => {
     if (!context) return
     await handleRest()
-    handleSaveHistory('reset')
+    handleSaveHistory(ActionMode.RESET)
   }
   const handleDownload = (name: string = `draw-studio-${ Date.now() }`) => {
     if (!canvasRef.value) return
@@ -303,6 +308,10 @@
     handleClear()
     emits('clear', canvasRef.value!, context!)
   }
+  const onModeChange = (value: ModeType) => {
+    insideMode.value = value
+    emits('update:mode', value)
+  }
   const onLineWidthChange = (value: number) => {
     insideLineWidth.value = value
     emits('update:line-width', value)
@@ -328,7 +337,7 @@
       offscreenContext = offscreenCanvas.getContext('2d')
     }
     await handleRest()
-    handleSaveHistory('reset')
+    handleSaveHistory(ActionMode.RESET)
   }
 
   onMounted(() => {

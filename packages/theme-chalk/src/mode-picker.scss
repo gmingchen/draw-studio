@@ -2,7 +2,7 @@
 
 $icon: #{$namespace}-icon;
 
-@include b(line-picker) {
+@include b(mode-picker) {
   .#{$icon} {
     cursor: pointer;
     @extend .rotate-and-scale;
@@ -22,20 +22,6 @@ $icon: #{$namespace}-icon;
     }
     &:last-child {
       margin-bottom: 4px;
-    }
-    & > span {
-      width: 50px;
-      font-size: 14px;
-    }
-    & > div {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      & > div {
-        border-radius: 50%;
-        background-color: red;
-      }
     }
     @include when(active) {
       background-color: #f5f5f5;

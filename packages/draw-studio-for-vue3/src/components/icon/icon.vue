@@ -20,7 +20,8 @@
   const { name, size } = defineProps(iconProps)
 
   const svg = computed(() => {
-    return name ? (Svgs as Record<string, any>)[name] : undefined
+    const key = name ? name.charAt(0).toUpperCase() + name.slice(1) : ''
+    return key ? (Svgs as Record<string, any>)[key] : undefined
   })
 
   const style = computed<CSSProperties>(() => {

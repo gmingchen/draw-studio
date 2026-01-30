@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     <DrawStudio
+      v-model:mode="mode"
       v-model:line-width="lineWidth"
       v-model:color="color"
       :use-toolbar="true"
@@ -26,6 +27,8 @@ import 'draw-studio/dist/draw-studio.css'
 import boy1 from './boy.jpeg'
 import boy from './boy.png'
 import girl from './girl.png'
+
+const mode = ref('pen')
 
 const lineWidth = ref(2)
 
