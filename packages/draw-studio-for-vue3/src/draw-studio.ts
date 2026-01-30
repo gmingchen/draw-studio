@@ -7,7 +7,7 @@ export enum Mode {
   CIRCLE = 'circle',
   RECTANGLE = 'rectangle'
 }
-export const modes = [Mode.PENCIL, Mode.PEN,/*  Mode.CIRCLE, Mode.RECTANGLE */] as const
+export const modes = [Mode.PENCIL, Mode.PEN, Mode.CIRCLE, Mode.RECTANGLE] as const
 export type ModeType = typeof modes[number]
 
 export const toolbarPositions= ['top', 'right', 'bottom', 'left'] as const

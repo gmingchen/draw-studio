@@ -26,7 +26,7 @@
     visible.value = !visible.value
   }
 
-  const handleClickOutside = (event: MouseEvent) => {
+  const handleClickOutside = (event: Event) => {
     const dropdown = dropdownRef.value!
     if (dropdown && !dropdown.contains(event.target as Node)) {
       visible.value = false
@@ -40,12 +40,14 @@
   }
 
   onMounted(() => {
-    document.addEventListener('mousedown', handleClickOutside)
+    const clickEvent = 'ontouchstart' in window ? 'touchstart' : 'mousedown'
+    document.addEventListener(clickEvent, handleClickOutside)
     document.addEventListener('keydown', handleKeydown)
   })
 
   onUnmounted(() => {
-    document.removeEventListener('mousedown', handleClickOutside)
+    const clickEvent = 'ontouchstart' in window ? 'touchstart' : 'mousedown'
+    document.removeEventListener(clickEvent, handleClickOutside)
     document.removeEventListener('keydown', handleKeydown)
   })
 </script>

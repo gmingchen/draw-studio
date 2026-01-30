@@ -34,8 +34,8 @@
     DrawStudioEmits, Mode, ModeType, ActionMode, DrawActionModeType, DrawAction,
   } from './draw-studio'
   import {
-    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition,
-    drawLines, drawImage, drawPoint, drawPoints,
+    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition, getCenterPosition,
+    drawLines, drawImage, drawPoints, drawCircle, drawRectangle,
     Position, Event
   } from '@draw-studio/utils'
 
@@ -58,6 +58,7 @@
 
   const isDrawing = ref(false)
   const drawingPositions = ref<Position[]>([])
+  const drawingImageData = ref<ImageData | null>(null)
 
   const lastPosition = reactive<Position>({ x: 0, y: 0 })
   const lastIsInside = ref(false)
@@ -90,6 +91,12 @@
   }
   const handleCurrentDrawPoints = (positions: Position[]) => {
     drawPoints(context!, positions, insideLineWidth.value + 5, insideColor.value)
+  }
+  const handleCurrentDrawCircle = (startPosition: Position, endPosition: Position) => {
+    drawCircle(context!, startPosition, endPosition, insideLineWidth.value, insideColor.value)
+  }
+  const handleCurrentDrawRectangle = (startPosition: Position, endPosition: Position) => {
+    drawRectangle(context!, startPosition, endPosition, insideLineWidth.value, insideColor.value)
   }
 
   const handleSaveHistory = (mode: DrawActionModeType) => {
@@ -144,6 +151,10 @@
         } else if (action.mode === Mode.PEN) {
           drawLines(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth, action.color)
           drawPoints(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth + 5, action.color)
+        } else if (action.mode === Mode.CIRCLE) {
+          drawCircle(useOffscreen ? offscreenContext! : context!, action.positions[0], action.positions[1], action.lineWidth, action.color)
+        } else if (action.mode === Mode.RECTANGLE) {
+          drawRectangle(useOffscreen ? offscreenContext! : context!, action.positions[0], action.positions[1], action.lineWidth, action.color)
         }
       }
     }
@@ -224,10 +235,9 @@
     const canvas = canvasRef.value
     if (!canvas) return
     if (!globalMouseMoveHandler) {
-      let imageData: ImageData | null = null
       globalMouseMoveHandler = (event: Event) => {
-        if (!imageData) return
-        context!.putImageData(imageData, 0, 0)
+        if (!drawingImageData.value) return
+        context!.putImageData(drawingImageData.value!, 0, 0)
         handleCurrentDrawLines([...drawingPositions.value, getEventPosition(canvas, event)])
       }
       globalMouseUpHandler = (event: Event) => {
@@ -242,19 +252,60 @@
         const isClosed = first && Math.abs(first.x - x) <= 10 && Math.abs(first.y - y) <= 10
         if (drawingPositions.value.length > 2 && isClosed) {
           drawingPositions.value.push({ ...first })
-          context!.putImageData(imageData!, 0, 0)
+          context!.putImageData(drawingImageData.value!, 0, 0)
           handleCurrentDrawLines(drawingPositions.value)
           handleStopDraw()
         } else {
           drawingPositions.value.push({ x, y })
           handleCurrentDrawPoints([{ x, y }])
-          imageData = context!.getImageData(0, 0, props.width, props.height)
+          drawingImageData.value = context!.getImageData(0, 0, props.width, props.height)
         }
         emits('draw', canvas, context!, { x, y })
       }
       document.addEventListener('mousemove', globalMouseMoveHandler)
       document.addEventListener('mouseup', globalMouseUpHandler)
     }
+  }
+  const handleGraphics = (event: Event, mode: DrawActionModeType) => {
+    const canvas = canvasRef.value
+    if (!canvas || !context) return
+    isDrawing.value = true
+    const { x, y } = getEventPosition(canvas, event)
+    lastPosition.x = x
+    lastPosition.y = y
+    lastIsInside.value = true
+    drawingPositions.value.push({ x, y })
+    drawingImageData.value = context.getImageData(0, 0, props.width, props.height)
+    if (!globalMouseMoveHandler) {
+      globalMouseMoveHandler = (event: Event) => {
+        if (!isDrawing.value) return
+        const eventPosition = getEventPosition(canvas, event)
+        context!.putImageData(drawingImageData.value!, 0, 0)
+        if (mode === Mode.CIRCLE) {
+          handleCurrentDrawCircle({ x, y }, eventPosition)
+        } else if (mode === Mode.RECTANGLE) {
+          handleCurrentDrawRectangle({ x, y }, eventPosition)
+        }
+        lastPosition.x = eventPosition.x
+        lastPosition.y = eventPosition.y
+        lastIsInside.value = determineIsInsideByEvent(canvas, event)
+        emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+      }
+      globalMouseUpHandler = (event: Event) => {
+        const eventPosition = getEventPosition(canvas, event)
+        drawingPositions.value.push(eventPosition)
+        handleStopDraw()
+        emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+      }
+      document.addEventListener('mousemove', globalMouseMoveHandler)
+      document.addEventListener('mouseup', globalMouseUpHandler)
+    }
+  }
+  const handleCircle = (event: Event) => {
+    handleGraphics(event, Mode.CIRCLE)
+  }
+  const handleRectangle = (event: Event) => {
+    handleGraphics(event, Mode.RECTANGLE)
   }
 
   const handleUndo = () => {
@@ -294,6 +345,10 @@
       handlePencil(event)
     } else if (mode === Mode.PEN) {
       handlePen()
+    } else if (mode === Mode.CIRCLE) {
+      handleCircle(event)
+    } else if (mode === Mode.RECTANGLE) {
+      handleRectangle(event)
     }
   }
   const onMouseUp = (event: Event) => {
@@ -355,6 +410,10 @@
         handleCurrentDrawPoints([{ x, y }])
       }
       emits('draw', canvas, context!, { x, y })
+    } else if (mode === Mode.CIRCLE) {
+      handleCircle(event)
+    } else if (mode === Mode.RECTANGLE) {
+      handleRectangle(event)
     }
   }
   const onTouchMove = (event: Event) => {
@@ -368,6 +427,26 @@
       lastPosition.y = eventPosition.y
       drawingPositions.value.push(eventPosition)
       emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+    } else if (props.mode === Mode.PEN) {
+
+    } else if (props.mode === Mode.CIRCLE) {
+      const eventPosition = getEventPosition(canvas, event)
+      context!.putImageData(drawingImageData.value!, 0, 0)
+      handleCurrentDrawCircle(drawingPositions.value[0], eventPosition)
+      lastPosition.x = eventPosition.x
+      lastPosition.y = eventPosition.y
+      lastIsInside.value = determineIsInsideByEvent(canvas, event)
+      drawingPositions.value[1] = eventPosition
+      emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+    } else if (props.mode === Mode.RECTANGLE) {
+      const eventPosition = getEventPosition(canvas, event)
+      context!.putImageData(drawingImageData.value!, 0, 0)
+      handleCurrentDrawRectangle(drawingPositions.value[0], eventPosition)
+      lastPosition.x = eventPosition.x
+      lastPosition.y = eventPosition.y
+      lastIsInside.value = determineIsInsideByEvent(canvas, event)
+      drawingPositions.value[1] = eventPosition
+      emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
     }
   }
   const onTouchEnd = (event: Event) => {
@@ -375,6 +454,10 @@
       handleStopDraw()
     } else if (props.mode === Mode.PEN) {
 
+    } else if (props.mode === Mode.CIRCLE) {
+      handleStopDraw()
+    } else if (props.mode === Mode.RECTANGLE) {
+      handleStopDraw()
     }
   }
 

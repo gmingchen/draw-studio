@@ -82,6 +82,21 @@ export const getEdgePosition = (canvas: HTMLCanvasElement, position1: Position, 
 }
 
 /**
+ * 获取两点的中心坐标
+ * @param position1 起始点坐标
+ * @param position2 目标点坐标
+ * @returns 中心坐标
+ */
+export const getCenterPosition = (position1: Position, position2: Position): Position => {
+  const { x: x1, y: y1 } = position1
+  const { x: x2, y: y2 } = position2
+  return {
+    x: (x1 + x2) / 2,
+    y: (y1 + y2) / 2
+  }
+}
+
+/**
  * 判断坐标点是否在画布内
  * @param canvas 画布元素
  * @param position 坐标点
@@ -154,6 +169,43 @@ export const drawPoints = (context: CanvasRenderingContext2D, positions: Array<P
   positions.forEach(position => {
     drawPoint(context, position, size, color)
   })
+}
+
+/**
+ * 绘制一个圆
+ * @param context 画布上下文
+ * @param position1 起始点坐标
+ * @param position2 目标点坐标
+ * @param width 圆线宽
+ * @param color 圆颜色
+ */
+export const drawCircle = (context: CanvasRenderingContext2D, position1: Position, position2: Position, width: number, color: string) => {
+  context.beginPath()
+  const center = getCenterPosition(position1, position2)
+  const radiusX = Math.abs(position2.x - center.x)
+  const radiusY = Math.abs(position2.y - center.y)
+  context.ellipse(center.x, center.y, radiusX, radiusY, 0, 0, 2 * Math.PI)
+  context.lineWidth = width
+  context.strokeStyle = color
+  context.stroke()
+}
+
+/**
+ * 绘制一个矩形
+ * @param context 画布上下文
+ * @param position1 起始点坐标
+ * @param position2 目标点坐标
+ * @param width 矩形线宽
+ * @param color 矩形颜色
+ */
+export const drawRectangle = (context: CanvasRenderingContext2D, position1: Position, position2: Position, width: number, color: string) => {
+  context.beginPath()
+  const { x: x1, y: y1 } = position1
+  const { x: x2, y: y2 } = position2
+  context.rect(x1, y1, x2 - x1, y2 - y1)
+  context.lineWidth = width
+  context.strokeStyle = color
+  context.stroke()
 }
 
 /**

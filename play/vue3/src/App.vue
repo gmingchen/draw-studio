@@ -28,7 +28,7 @@
   import boy from './boy.png'
   import girl from './girl.png'
 
-  const mode = ref<ModeType>(Mode.PENCIL)
+  const mode = ref<ModeType>(Mode.RECTANGLE)
 
   const lineWidth = ref(2)
 
