@@ -31,10 +31,11 @@
   import { Icon, ModePicker, LinePicker, ColorPicker } from './components'
   import {
     drawStudioProps,
-    DrawStudioEmits, ModeType, ActionMode, DrawActionModeType, DrawAction,
+    DrawStudioEmits, Mode, ModeType, ActionMode, DrawActionModeType, DrawAction,
   } from './draw-studio'
   import {
-    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition, drawLines, drawImage,
+    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition,
+    drawLines, drawImage, drawPoint, drawPoints,
     Position, Event
   } from '@draw-studio/utils'
 
@@ -87,6 +88,9 @@
   const handleCurrentDrawLines = (positions: Position[]) => {
     drawLines(context!, positions, insideLineWidth.value, insideColor.value)
   }
+  const handleCurrentDrawPoints = (positions: Position[]) => {
+    drawPoints(context!, positions, insideLineWidth.value + 5, insideColor.value)
+  }
 
   const handleSaveHistory = (mode: DrawActionModeType) => {
     if (!props.useHistory) return
@@ -107,7 +111,6 @@
     history.active = history.list.length - 1
     drawingPositions.value = []
   }
-
   const handleDrawHistory = async (active: number) => {
     if (!context) return
     let list = history.list.slice(0, active + 1)
@@ -135,8 +138,13 @@
     }
 
     for (const action of list) {
-      if (action.mode === 'pencil' && action.positions.length > 0) {
-        drawLines(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth, action.color)
+      if (action.positions.length > 0) {
+        if (action.mode === Mode.PENCIL) {
+          drawLines(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth, action.color)
+        } else if (action.mode === Mode.PEN) {
+          drawLines(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth, action.color)
+          drawPoints(useOffscreen ? offscreenContext! : context!, action.positions, action.lineWidth + 5, action.color)
+        }
       }
     }
 
@@ -156,40 +164,6 @@
     }
   }
 
-  const handlePencilDraw = () => {
-    const canvas = canvasRef.value
-    if (!canvas) return
-  }
-
-  const handleGlobalMouseMove = (event: Event) => {
-    const canvas = canvasRef.value
-    if (!isDrawing.value || !canvas) return
-    const eventPosition = getEventPosition(canvas, event)
-    const isInside = determineIsInsideByEvent(canvas, event)
-    if (isInside) {
-      if(lastIsInside.value) {
-        event.preventDefault()
-        handleCurrentDrawLines([lastPosition, eventPosition])
-      } else {
-        const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-        handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
-      }
-    } else {
-      if(lastIsInside.value) {
-        const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-        handleCurrentDrawLines([lastPosition, edgePosition])
-        drawingPositions.value.push(edgePosition)
-      }
-    }
-    drawingPositions.value.push(eventPosition)
-    lastPosition.x = eventPosition.x
-    lastPosition.y = eventPosition.y
-    lastIsInside.value = isInside
-    emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
-  }
-  const handleGlobalMouseUp = (_event: Event) => {
-    handleStopDraw()
-  }
   const handleGlobalListenersRemove = () => {
     globalMouseMoveHandler && document.removeEventListener('mousemove', globalMouseMoveHandler)
     globalMouseUpHandler && document.removeEventListener('mouseup', globalMouseUpHandler)
@@ -197,21 +171,6 @@
     globalMouseUpHandler = null
   }
 
-  const handleStartDraw = (event: Event) => {
-    isDrawing.value = true
-    const { x, y } = getEventPosition(canvasRef.value!, event)
-    lastPosition.x = x
-    lastPosition.y = y
-    lastIsInside.value = true
-    drawingPositions.value.push({ x, y })
-
-    if (!globalMouseMoveHandler) {
-      globalMouseMoveHandler = handleGlobalMouseMove
-      globalMouseUpHandler = handleGlobalMouseUp
-      document.addEventListener('mousemove', globalMouseMoveHandler)
-      document.addEventListener('mouseup', globalMouseUpHandler)
-    }
-  }
   const handleStopDraw = () => {
     if (isDrawing.value) {
       isDrawing.value = false
@@ -221,6 +180,82 @@
     }
   }
 
+  const handlePencil = (event: Event) => {
+    const canvas = canvasRef.value
+    if (!canvas) return
+    isDrawing.value = true
+    const { x, y } = getEventPosition(canvas, event)
+    lastPosition.x = x
+    lastPosition.y = y
+    lastIsInside.value = true
+    drawingPositions.value.push({ x, y })
+    if (!globalMouseMoveHandler) {
+      globalMouseMoveHandler = (event: Event) => {
+        if (!isDrawing.value) return
+        const eventPosition = getEventPosition(canvas, event)
+        const isInside = determineIsInsideByEvent(canvas, event)
+        if (isInside) {
+          if(lastIsInside.value) {
+            event.preventDefault()
+            handleCurrentDrawLines([lastPosition, eventPosition])
+          } else {
+            const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
+            handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
+          }
+        } else {
+          if(lastIsInside.value) {
+            const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
+            handleCurrentDrawLines([lastPosition, edgePosition])
+            drawingPositions.value.push(edgePosition)
+          }
+        }
+        drawingPositions.value.push(eventPosition)
+        lastPosition.x = eventPosition.x
+        lastPosition.y = eventPosition.y
+        lastIsInside.value = isInside
+        emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+      }
+      globalMouseUpHandler = () => handleStopDraw()
+      document.addEventListener('mousemove', globalMouseMoveHandler)
+      document.addEventListener('mouseup', globalMouseUpHandler)
+    }
+  }
+  const handlePen = () => {
+    const canvas = canvasRef.value
+    if (!canvas) return
+    if (!globalMouseMoveHandler) {
+      let imageData: ImageData | null = null
+      globalMouseMoveHandler = (event: Event) => {
+        if (!imageData) return
+        context!.putImageData(imageData, 0, 0)
+        handleCurrentDrawLines([...drawingPositions.value, getEventPosition(canvas, event)])
+      }
+      globalMouseUpHandler = (event: Event) => {
+        const isInside = determineIsInsideByEvent(canvas, event)
+        if (!isInside) return
+        isDrawing.value = true
+        const { x, y } = getEventPosition(canvas, event)
+        lastPosition.x = x
+        lastPosition.y = y
+        lastIsInside.value = true
+        const first = drawingPositions.value[0]
+        const isClosed = first && Math.abs(first.x - x) <= 10 && Math.abs(first.y - y) <= 10
+        if (drawingPositions.value.length > 2 && isClosed) {
+          drawingPositions.value.push({ ...first })
+          context!.putImageData(imageData!, 0, 0)
+          handleCurrentDrawLines(drawingPositions.value)
+          handleStopDraw()
+        } else {
+          drawingPositions.value.push({ x, y })
+          handleCurrentDrawPoints([{ x, y }])
+          imageData = context!.getImageData(0, 0, props.width, props.height)
+        }
+        emits('draw', canvas, context!, { x, y })
+      }
+      document.addEventListener('mousemove', globalMouseMoveHandler)
+      document.addEventListener('mouseup', globalMouseUpHandler)
+    }
+  }
 
   const handleUndo = () => {
     if (history.active <= 0 || !context) return
@@ -250,50 +285,97 @@
     link.click()
   }
 
-
   const onMouseDown = (event: Event) => {
+    if (!canvasRef.value) return
+    if ('buttons' in event && event.buttons !== 1) return
+
+    const { mode } = props
+    if (mode === Mode.PENCIL) {
+      handlePencil(event)
+    } else if (mode === Mode.PEN) {
+      handlePen()
+    }
+  }
+  const onMouseUp = (event: Event) => {
     if (!canvasRef.value) return
     // 判断鼠标是否在canvas内
     const isInside = determineIsInsideByEvent(canvasRef.value, event)
     if (!isInside) return
     if ('buttons' in event && event.buttons !== 1) return
-    handleStartDraw(event)
-  }
-  const onMouseUp = () => {
-    handleStopDraw()
+
+    if (props.mode === Mode.PENCIL) {
+      handleStopDraw()
+    } else if (props.mode === Mode.PEN) {
+
+    }
   }
   const onMouseEnter = (event: Event) => {
     if (!('buttons' in event)) return
     if (event.buttons !== 1) return
     if (!isDrawing.value) return
-    const eventPosition = getEventPosition(canvasRef.value!, event)
-    if (!lastIsInside.value) {
-      const canvas = canvasRef.value!
-      const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
-      handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
+
+    if (props.mode === Mode.PENCIL) {
+      const eventPosition = getEventPosition(canvasRef.value!, event)
+      if (!lastIsInside.value) {
+        const canvas = canvasRef.value!
+        const edgePosition = getEdgePosition(canvas, lastPosition, eventPosition)
+        handleCurrentDrawLines([lastPosition, edgePosition, eventPosition])
+      }
+      lastPosition.x = eventPosition.x
+      lastPosition.y = eventPosition.y
+      lastIsInside.value = true
+    } else if (props.mode === Mode.PEN) {
+
     }
-    lastPosition.x = eventPosition.x
-    lastPosition.y = eventPosition.y
-    lastIsInside.value = true
   }
 
   const onTouchStart = (event: Event) => {
     event.preventDefault()
-    handleStartDraw(event)
+    const { mode } = props
+    if (mode === Mode.PENCIL) {
+      handlePencil(event)
+    } else if (mode === Mode.PEN) {
+      const canvas = canvasRef.value!
+      const isInside = determineIsInsideByEvent(canvas, event)
+      if (!isInside) return
+      isDrawing.value = true
+      const { x, y } = getEventPosition(canvas, event)
+      lastPosition.x = x
+      lastPosition.y = y
+      lastIsInside.value = true
+      const first = drawingPositions.value[0]
+      const isClosed = first && Math.abs(first.x - x) <= 10 && Math.abs(first.y - y) <= 10
+      if (drawingPositions.value.length > 2 && isClosed) {
+        drawingPositions.value.push({ ...first })
+        handleCurrentDrawLines(drawingPositions.value)
+        handleStopDraw()
+      } else {
+        drawingPositions.value.push({ x, y })
+        handleCurrentDrawLines(drawingPositions.value)
+        handleCurrentDrawPoints([{ x, y }])
+      }
+      emits('draw', canvas, context!, { x, y })
+    }
   }
   const onTouchMove = (event: Event) => {
     const canvas = canvasRef.value
     if (!isDrawing.value || !canvas || !context) return
-    event.preventDefault()
-    const eventPosition = getEventPosition(canvas, event)
-    handleCurrentDrawLines([lastPosition, eventPosition])
-    lastPosition.x = eventPosition.x
-    lastPosition.y = eventPosition.y
-    drawingPositions.value.push(eventPosition)
-    emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+    if (props.mode === Mode.PENCIL) {
+      event.preventDefault()
+      const eventPosition = getEventPosition(canvas, event)
+      handleCurrentDrawLines([lastPosition, eventPosition])
+      lastPosition.x = eventPosition.x
+      lastPosition.y = eventPosition.y
+      drawingPositions.value.push(eventPosition)
+      emits('draw', canvas, context!, { x: eventPosition.x, y: eventPosition.y })
+    }
   }
-  const onTouchEnd = () => {
-    handleStopDraw()
+  const onTouchEnd = (event: Event) => {
+    if (props.mode === Mode.PENCIL) {
+      handleStopDraw()
+    } else if (props.mode === Mode.PEN) {
+
+    }
   }
 
   const onUndo = () => {
@@ -308,6 +390,7 @@
     handleClear()
     emits('clear', canvasRef.value!, context!)
   }
+
   const onModeChange = (value: ModeType) => {
     insideMode.value = value
     emits('update:mode', value)
@@ -320,6 +403,7 @@
     insideColor.value = value
     emits('update:color', value)
   }
+
   const onDownload = () => {
     handleDownload()
     emits('download', canvasRef.value!, context!)
@@ -361,4 +445,3 @@
 <style lang="scss" scoped>
   @use '@draw-studio/theme-chalk/src/draw-studio.scss';
 </style>
-

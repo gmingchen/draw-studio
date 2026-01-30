@@ -1,7 +1,13 @@
 import { ExtractPropTypes, PropType } from 'vue'
 import { Position, imageMode, ImageMode } from '@draw-studio/utils'
 
-export const modes = ['pencil', 'pen',/*  'circle', 'rectangle' */] as const
+export enum Mode {
+  PENCIL = 'pencil',
+  PEN = 'pen',
+  CIRCLE = 'circle',
+  RECTANGLE = 'rectangle'
+}
+export const modes = [Mode.PENCIL, Mode.PEN,/*  Mode.CIRCLE, Mode.RECTANGLE */] as const
 export type ModeType = typeof modes[number]
 
 export const toolbarPositions= ['top', 'right', 'bottom', 'left'] as const
@@ -71,7 +77,7 @@ export const drawStudioProps = {
 export type DrawStudioType = ExtractPropTypes<typeof drawStudioProps>
 
 export interface DrawStudioEmits {
-  (e: 'update:mode', mode: ModeType): void
+  (e: 'update:mode', mode: string): void
   (e: 'update:line-width', lineWidth: number): void
   (e: 'update:color', color: string): void
   (e: 'draw', canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, position: Position): void

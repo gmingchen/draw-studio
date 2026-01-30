@@ -130,6 +130,33 @@ export const drawLines = (context: CanvasRenderingContext2D, positions: Array<Po
 }
 
 /**
+ * 绘制一个点
+ * @param context 画布上下文
+ * @param position 点坐标
+ * @param size 点大小
+ * @param color 点颜色
+ */
+export const drawPoint = (context: CanvasRenderingContext2D, position: Position, size: number, color: string) => {
+  context.beginPath()
+  context.arc(position.x, position.y, size / 2, 0, 2 * Math.PI)
+  context.fillStyle = color
+  context.fill()
+}
+
+/**
+ * 绘制多个点
+ * @param context 画布上下文
+ * @param positions 包含多个点坐标的数组
+ * @param size 点大小
+ * @param color 点颜色
+ */
+export const drawPoints = (context: CanvasRenderingContext2D, positions: Array<Position>, size: number, color: string) => {
+  positions.forEach(position => {
+    drawPoint(context, position, size, color)
+  })
+}
+
+/**
  * 通过 fetch 获取图片数据（blob）并绘制到 canvas，彻底避免跨域
  * @param canvas 画布元素
  * @param context 画布上下文

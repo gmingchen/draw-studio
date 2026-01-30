@@ -20,32 +20,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import DrawStudio from '@draw-studio/draw-studio-for-vue3'
-import { DrawStudioVue3 } from 'draw-studio/dist/draw-studio.js'
-import 'draw-studio/dist/draw-studio.css'
-import boy1 from './boy.jpeg'
-import boy from './boy.png'
-import girl from './girl.png'
+  import { ref } from 'vue';
+  import DrawStudio, { ModeType, Mode } from '@draw-studio/draw-studio-for-vue3'
+  import { DrawStudioVue3 } from 'draw-studio/dist/draw-studio.js'
+  import 'draw-studio/dist/draw-studio.css'
+  import boy1 from './boy.jpeg'
+  import boy from './boy.png'
+  import girl from './girl.png'
 
-const mode = ref('pen')
+  const mode = ref<ModeType>(Mode.PENCIL)
 
-const lineWidth = ref(2)
+  const lineWidth = ref(2)
 
-const color = ref('#FF0000')
+  const color = ref('#FF0000')
 
-const onDraw = (...args: any[]) => {
-  console.log(args);
-}
-
+  const onDraw = (...args: any[]) => {
+    console.log(args);
+  }
 </script>
 
 <style scoped>
-.app {
-  padding: 20px;
-  width: 700px;
-  height: 700px;
-  margin: 0 auto;
-  background-color: #A3A0A011;
-}
+  .app {
+    padding: 20px;
+    width: 700px;
+    height: 700px;
+    margin: 0 auto;
+    background-color: #A3A0A011;
+  }
 </style>

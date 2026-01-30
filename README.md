@@ -90,6 +90,7 @@ const handleDraw = (canvas, context, position) => {
 | `useBackgroundImage` | `Boolean` | `false` | 是否使用背景图片 |
 | `backgroundImage` | `String` | `''` | 背景图片 URL |
 | `backgroundImageMode` | `String` | `'cover'` | 背景图片填充模式 |
+| `mode` | `Number` | `pencil` | 绘图模式：`pencil`-铅笔/`pen`-钢笔 |
 | `lineWidth` | `Number` | `3` | 线条宽度（1-50px） |
 | `color` | `String` | `'#000000'` | 绘制颜色 |
 | `useToolbar` | `Boolean` | `true` | 是否显示工具栏 |
