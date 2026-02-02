@@ -34,7 +34,7 @@
     DrawStudioEmits, Mode, ModeType, ActionMode, DrawActionModeType, DrawAction,
   } from './draw-studio'
   import {
-    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition, getCenterPosition,
+    namespace, getEventPosition, determineIsInsideByEvent, getEdgePosition,
     drawLines, drawImage, drawPoints, drawCircle, drawRectangle,
     Position, Event
   } from '@draw-studio/utils'
